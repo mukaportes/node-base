@@ -1,7 +1,7 @@
 require('../utils/correlation-id-handler').activate('correlation-id');
 const bodyParser = require('body-parser');
-const express = require('express');
-const helmet = require('helmet');
+const koaHelmet = require('koa-helmet');
+const Koa = require('koa');
 const { createServer, proxy } = require('aws-serverless-express');
 const { eventContext } = require('aws-serverless-express/middleware');
 const expressContextMiddleware = require('../express/context-middleware');
@@ -28,10 +28,8 @@ function expressToLambdaHandler(app) {
 /**
  * @private
  */
-function expressToBodyParser() {
-  const bodyParserOptions = {
-    limit: '10mb',
-  };
+function expressToBodyParser(limit = '10mb') {
+  const bodyParserOptions = { limit };
 
   return bodyParser.json(bodyParserOptions);
 }
@@ -40,11 +38,11 @@ function expressToBodyParser() {
  * @private
  */
 function setupAppMiddlewares(app, options) {
-  app.use(expressToBodyParser());
+  app.use(expressToBodyParser(options.bodyParserLimit));
   app.use(expressContextMiddleware);
   app.use(expressLoggingMiddleware);
   app.use(expressCorsMiddleware());
-  app.use(helmet({ dnsPrefetchControl: false }));
+  app.use(koaHelmet({ dnsPrefetchControl: false }));
 
   /* istanbul ignore if */
   if (options.mode === 'lambda') app.use(eventContext());
@@ -70,7 +68,7 @@ function startApp(app) {
  * to be the Lambda entrypoint
  */
 module.exports = function expressAppBuilder(options = {}) {
-  const app = express();
+  const app = new Koa();
 
   setupAppMiddlewares(app, options);
 
@@ -78,8 +76,8 @@ module.exports = function expressAppBuilder(options = {}) {
   if (options.developmentMode) new NodeInspector().start();
 
   return {
-    expressApp: app,
     handler: expressToLambdaHandler(app),
+    koaApp: app,
     start() {
       /* istanbul ignore next */
       return startApp(app);
