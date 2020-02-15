@@ -12,7 +12,7 @@ const NodeInspector = require('../development/node-inspector');
 /**
  * The Express HTTP port for development mode
  */
-const EXPRESS_PORT = process.env.EXPRESS_PORT || 3000;
+const EXPRESS_PORT = process.env.APP_PORT || 3000;
 
 /**
  * @private

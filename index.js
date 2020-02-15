@@ -30,15 +30,6 @@ module.exports = {
     Security,
     Settings: AppSettings,
   },
-  Express: {
-    adapter: expressAdapter,
-    appBuilder: expressAppBuilder,
-    AuthenticatedHandler: ExpressAuthenticatedHandler,
-    corsMiddleware: expressCorsMiddleware,
-    Handler: ExpressHandler,
-    loggingMiddleware: expressLoggingMiddleware,
-    UserAuthenticatedHandler: ExpressUserAuthenticatedHandler,
-  },
   External: {
     TypeOrmConfigFactory,
     typeOrmLogger,
@@ -46,6 +37,15 @@ module.exports = {
   MessageQueue: {
     lambdaAdapter,
     LambdaHandler,
+  },
+  Server: {
+    adapter: expressAdapter,
+    appBuilder: expressAppBuilder,
+    AuthenticatedHandler: ExpressAuthenticatedHandler,
+    corsMiddleware: expressCorsMiddleware,
+    Handler: ExpressHandler,
+    loggingMiddleware: expressLoggingMiddleware,
+    UserAuthenticatedHandler: ExpressUserAuthenticatedHandler,
   },
   Tests: {
     helpers: testsHelpers,
