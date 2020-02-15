@@ -42,6 +42,8 @@ class ArrayUtils {
     dataset, iteree, down = (item, context) => ({ context, item }), up = item => item,
     context, limit = this.limit, concurrent = true,
   }) {
+    // NOTE: should not use Bluebird; the package is used ONLY here
+    // could switch to a for loop with await?
     const promisifiedDataset = await Promise.map(dataset, async (iterated) => {
       const { item, context: newContext } = await down(iterated, context, limit);
 

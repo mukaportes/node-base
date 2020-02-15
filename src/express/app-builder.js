@@ -1,7 +1,6 @@
 require('../utils/correlation-id-handler').activate('correlation-id');
 const bodyParser = require('body-parser');
-const koaHelmet = require('koa-helmet');
-const Koa = require('koa');
+const fastify = require('fastify');
 const { createServer, proxy } = require('aws-serverless-express');
 const { eventContext } = require('aws-serverless-express/middleware');
 const expressContextMiddleware = require('../express/context-middleware');
@@ -42,7 +41,6 @@ function setupAppMiddlewares(app, options) {
   app.use(expressContextMiddleware);
   app.use(expressLoggingMiddleware);
   app.use(expressCorsMiddleware());
-  app.use(koaHelmet({ dnsPrefetchControl: false }));
 
   /* istanbul ignore if */
   if (options.mode === 'lambda') app.use(eventContext());
@@ -51,9 +49,10 @@ function setupAppMiddlewares(app, options) {
 /**
  * @private
  */
+// NOTE: fastify.listen() is asynchronous; that's why the await was added
 /* istanbul ignore next */
-function startApp(app) {
-  const httpServer = app.listen(EXPRESS_PORT);
+async function startApp(app) {
+  const httpServer = await app.listen(EXPRESS_PORT);
 
   console.log(`Application listening on port ${EXPRESS_PORT}`); // eslint-disable-line no-console
 
@@ -68,7 +67,7 @@ function startApp(app) {
  * to be the Lambda entrypoint
  */
 module.exports = function expressAppBuilder(options = {}) {
-  const app = new Koa();
+  const app = fastify({ logger: true });
 
   setupAppMiddlewares(app, options);
 
@@ -77,7 +76,6 @@ module.exports = function expressAppBuilder(options = {}) {
 
   return {
     handler: expressToLambdaHandler(app),
-    koaApp: app,
     start() {
       /* istanbul ignore next */
       return startApp(app);
